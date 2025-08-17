@@ -4,6 +4,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { EntityManager, Repository } from 'typeorm';
 import { Item } from './entities/item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Listing } from './entities/listing.entity';
 
 @Injectable()
 export class ItemsService {
@@ -14,7 +15,16 @@ export class ItemsService {
   ) {}
 
   async create(createItemDto: CreateItemDto) {
-    const item = new Item(createItemDto);
+    const listing = new Listing({
+      ...createItemDto.listing,
+      rating: 0,
+    });
+
+    const item = new Item({
+      ...createItemDto,
+      listing,
+    });
+
     return await this.entityManager.save(item);
   }
 
