@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { EntityManager, Repository } from 'typeorm';
@@ -26,11 +26,22 @@ export class ItemsService {
     return await this.itemsRepository.findOneBy({ id });
   }
 
-  update(id: number, updateItemDto: UpdateItemDto) {
-    return `This action updates a #${id} item`;
+  async update(id: number, updateItemDto: UpdateItemDto) {
+    const item = await this.findOne(id);
+    if (!item) throw new NotFoundException(`User with id: ${id} not found!`);
+
+    if (updateItemDto.name) {
+      item.name = updateItemDto.name;
+    }
+    if (updateItemDto.public) {
+      item.public = updateItemDto.public;
+    }
+
+    return this.entityManager.save(item);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} item`;
+    this.itemsRepository.delete(id);
+    return { message: 'Item deleted successfully!' };
   }
 }
